@@ -1,0 +1,17 @@
+{
+  "rounds": 300,
+  "mcmc_start": 151,
+  "temperature": 20,
+  "walk_sigma": 0.1,
+  "noise_radius": 10,
+  "noise_max_radius": 30,
+  "pool_size": 1024,
+  "epsilon_scale": 16,
+  "control_norm_ratio": 0.99,
+  "search_policy": {
+    "mode": "best_mixture",
+    "exploit_probability": 0.7,
+    "local_radius_fraction": 0.25,
+    "local_radius_max": 5
+  }
+}

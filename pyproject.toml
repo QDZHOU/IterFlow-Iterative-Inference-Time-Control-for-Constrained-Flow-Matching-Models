@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iterflow"
+version = "0.1.0"
+description = "Iterative inference-time control for constrained flow matching: Maze2D"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26,<2", "scipy>=1.11", "torch>=2.2", "casadi>=3.6",
+  "mujoco>=3.1", "gym==0.26.2", "h5py>=3.10", "einops>=0.7",
+  "tyro>=0.8", "PyYAML>=6", "tqdm>=4.65",
+]
+
+[project.optional-dependencies]
+train = ["tensorboard>=2.14", "scikit-learn>=1.3"]
+
+[project.scripts]
+iterflow = "run.eval:main"
+
+[tool.setuptools.packages.find]
+include = ["hardflow*", "run*"]
+exclude = ["tests*", "run_scripts*"]
+
+[tool.setuptools.package-data]
+"hardflow.envs" = ["D4RL_LICENSE"]

@@ -1,0 +1,54 @@
+{
+  "checkpoint": "logs/maze2d-large-v1/flow/H384_1e6steps/model_ema_20.pth",
+  "control_cost_weight": 0.3,
+  "cost": {
+    "coefficient": 1.0,
+    "kind": "hf"
+  },
+  "dynamics": "logs/maze2d-large-v1/dynamics/linear_model.npz",
+  "goal": [
+    7.0,
+    9.0
+  ],
+  "hardflow": {
+    "constraint": "ellipses_and_dynamics",
+    "cost": "distance",
+    "device": "cpu",
+    "ellipse_margin": 0.4,
+    "env": "maze2d-large-v1",
+    "guidance_method": "hardflow_new",
+    "hardflow_activation": "late",
+    "hardflow_cost_scale": 800.0,
+    "horizon": 384,
+    "maze_circle_center": [
+      4.5,
+      5.3
+    ],
+    "maze_square_center": [
+      1.5,
+      4.8
+    ],
+    "ode_t_steps": 10,
+    "solver_print_level": 0,
+    "warmstart_batch": 1
+  },
+  "memory_samples": 200,
+  "observation": [
+    0.94875744,
+    2.93648809,
+    -0.01347715,
+    0.06358764
+  ],
+  "rollout_max_steps": 800,
+  "rollout_seed": 1051813958,
+  "rollout_wall_cost_weight": 1.0,
+  "tail_steps": 5,
+  "terminal_cost_kind": "first_difference",
+  "terminal_cost_weight": 1.0,
+  "tolerances": {
+    "feasibility": 5e-06,
+    "reach": 1e-09,
+    "tie": 1e-12
+  },
+  "u_bar": 300.0
+}

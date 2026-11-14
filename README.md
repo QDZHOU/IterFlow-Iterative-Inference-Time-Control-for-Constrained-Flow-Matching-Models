@@ -1,1 +1,118 @@
-# IterFlow-Iterative-Inference-Time-Control-for-Constrained-Flow-Matching-Models
+# IterFlow
+
+Iterative Inference-Time Control for Constrained Flow-Matching Models — Maze2D.
+
+The repository follows the original HardFlow layout. It contains native
+**HardFlow** and the **IterFlow** history-ball extension. Independent seed
+experiments, Projection, Gradient/OC-Flow baselines, No-ball experiments and
+plotting utilities are excluded.
+
+## Structure
+
+```text
+hardflow/
+  config/                 model and dataset configuration
+  datasets/               dataset loading and normalization
+  envs/                   native MuJoCo Maze2D
+  models_flow/
+    unet.py               pretrained flow architecture
+    flow_matcher.py       flow-matching training objective
+    flow_policy.py        native HardFlow surrogate and sampler
+    value_model.py        original task/constraint value model
+    iterflow/             history balls, noise search and tail optimization
+  utils/                  tensor utilities
+run/
+  train.py                flow model training
+  eval.py                 HardFlow / IterFlow evaluation entry
+  fit_dynamics.py         linear dynamics fitting
+  prepare_maze2d_native.py compact-data dynamics fitting
+configs/
+  maze2d.json              one runnable default scene
+  search.json             IterFlow search settings
+run_scripts/              minimal training/evaluation launchers
+docs/method.md            algorithm equations
+```
+
+The `hardflow` package name is retained for upstream compatibility, including
+saved normalizers. The new method is named **IterFlow**.
+
+## Setup
+
+Use Python 3.10+ and an editable installation from the repository root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+# Optional training / dynamics fitting dependencies:
+pip install -e '.[train]'
+```
+
+Required local assets (excluded from Git):
+
+- `logs/maze2d-large-v1/flow/H384_1e6steps/model_ema_20.pth`
+- `logs/maze2d-large-v1/dynamics/linear_model.npz`
+- `datasets/maze2d-large-sparse-v1.hdf5`
+
+Place trusted assets at the paths above, or create local symbolic links to an
+existing HardFlow checkout. Then verify their availability:
+
+```bash
+python -m run.eval doctor
+```
+
+On this machine the links already exist; `../HardFlow/.venv/bin/python` can be
+used without installing another environment. The new repository's code is
+imported, with only weights/data reused. The dynamics archive contains a pickled
+normalizer; use a trusted archive.
+
+## Run
+
+```bash
+# Native HardFlow baseline.
+python -m run.eval run --method hardflow --output outputs/hardflow
+
+# IterFlow, initialized by HardFlow.
+python -m run.eval run --method iterflow --output outputs/iterflow --rounds 300
+
+# Inspect progress or extend the requested total.
+python -m run.eval status outputs/iterflow
+python -m run.eval resume outputs/iterflow --rounds 500
+```
+
+Runs are foreground processes. Use a fresh output directory for every new run.
+The `--seed` and `--search-seed` parameters are retained solely for reproducible
+algorithm randomness; no seed sweep or seed-selection experiments are included.
+`--threads` controls CPU threads. `--dry-run` prints configuration without loading
+models. Results are numerical `.npz` / `.json` records; no figures are generated.
+
+Default scene: start `(0.94875744, 2.93648809)`, goal `(7,9)`, fixed initial
+velocity `(-0.01347715, 0.06358764)`. Edit `configs/maze2d.json` to change it.
+
+## Algorithm
+
+HardFlow's Problem 6 / Algorithm 1 prediction variable, objective, constraints
+and affine successor mapping are preserved. IterFlow adds a history-ball
+constraint to **the actual successor `F(y)`**, then assigns `x_next = F(y*)`.
+It does not project the result after optimization.
+
+Defaults: 10 denoising steps, control on the last 5; first 150 outer attempts
+use the incumbent/global mixture, from attempt 151 use chain-centered adaptive
+MH-style search. Only explicit-feasible strict cost improvements update history.
+
+The outer cost is `C + 0.3 E + wall_contact_steps`, with
+`E = 0.5 * sum_i ||u_i||² Δt_i`. `C` is the original 800-scaled sum of squared
+adjacent normalized position differences. The outer effort weight does not
+change HardFlow's inner surrogate regularizer. Contact cost is evaluated by
+native PD rollout; optimization admission does not certify collision-free
+execution. See [equations and details](docs/method.md).
+
+## Verification and attribution
+
+Before the final source-only cleanup, local tests checked the affine successor
+ball, conditioning, guidance effort/caps, minimum-ball fitting, proposal ratios,
+screening and rollout contact counting. Test scripts are not included in this
+core snapshot.
+See [local validation](docs/validation.md) and [attribution](NOTICE.md).
+The native MuJoCo 3 adapter preserves the D4RL license; its physics can differ
+from the original MuJoCo 2 benchmark.
