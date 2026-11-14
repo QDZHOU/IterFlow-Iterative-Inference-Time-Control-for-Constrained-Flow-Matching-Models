@@ -81,7 +81,7 @@ class HistoryMaze(Maze2D):
         if self.regularizer != 1: raise ValueError('Use coefficient 1: unchanged upstream baseline')
         if tuple(self.cfg.ode_t_span)!=(0,1) or self.cfg.ode_solver!='euler' or self.cfg.flow_matching_type!='cfm':
             raise ValueError('Only existing linear CFM Euler grid supported')
-        self.lambda_oc = float(settings.get('control_cost_weight',self.regularizer*(self.grid[1]-self.grid[0])))
+        self.lambda_oc = float(settings.get('control_cost_weight',0.1))
         if not np.isfinite(self.lambda_oc) or self.lambda_oc<0:raise ValueError('Control cost weight must be finite and nonnegative')
         if 'control_cost_weight' in settings:self.identity['control_cost_weight']=self.lambda_oc
         self.env.set_state(np.zeros(2),np.zeros(2))
@@ -106,7 +106,7 @@ class HistoryMaze(Maze2D):
             self.identity['evaluation_distance_cost_scale']=scale
         wall_weight=float(settings.get('rollout_wall_cost_weight',0.))
         if not np.isfinite(wall_weight) or wall_weight<0:raise ValueError('Invalid rollout wall-cost weight')
-        if wall_weight:
+        if wall_weight or settings.get('evaluate_rollout',False):
             self.identity['rollout_evaluation']=dict(wall_cost_weight=wall_weight,
                 max_steps=settings.get('rollout_max_steps',800),seed=settings.get('rollout_seed',0),
                 counting='native particle-wall contact steps',controller='PD 5/1',goal_radius=.5)

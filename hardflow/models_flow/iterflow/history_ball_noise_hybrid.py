@@ -180,7 +180,7 @@ def main():
             save_run(out/f'original_round_{r:02d}.npz',backend,original,noise)
             m=metrics(backend,run,original,time.perf_counter()-start,rollout_path=out/f'round_{r:02d}_rollout.npz')
             m['failure']=None if m['safe'] else 'final_explicit_constraints'
-        if settings.get('rollout_wall_cost_weight',0):
+        if settings.get('rollout_wall_cost_weight',0) or settings.get('evaluate_rollout',False):
             if failure:m.update(rollout_evaluated=False,rollout_skipped_reason='incomplete candidate')
             else:print(f'Rollout {r}: wall_contacts={m["rollout"]["wall_contact_steps"]}, reached={m["rollout"]["target_reached"]}, J_plan={m["J_plan"]:.6f}, J_eval={m["J"]:.6f}',flush=True)
         candidate_control_norms=np.linalg.norm(U,axis=1)

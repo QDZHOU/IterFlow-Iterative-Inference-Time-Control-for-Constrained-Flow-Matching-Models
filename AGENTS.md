@@ -11,7 +11,7 @@ ball, then set the successor to F(y*). No direct next-level ball on y or extra
 post-solve projection.
 
 Public defaults: configs/search.json, mixture search for attempts 1–150,
-adaptive MH-style search from 151; outer effort weight 0.3. Do not claim strict
+adaptive MH-style search from 151; outer objective C + 0.1E (contact weight zero; rollout statistics retained). Do not claim strict
 stationary MCMC: archive changes and cached chain costs are inherited limitations.
 
 Keep numerical admission distinct from execution safety. Goal arrival plus

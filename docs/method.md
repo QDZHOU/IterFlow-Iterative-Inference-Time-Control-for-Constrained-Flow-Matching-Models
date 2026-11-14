@@ -46,15 +46,15 @@ u_i=\frac{x_{i+1}-r_i}{\Delta t_i},\qquad
 E=\frac12\sum_i\|u_i\|_2^2\Delta t_i,
 \]
 \[
-J=C(x_N)+w_E E+w_{\rm contact}N_{\rm contact},
-\qquad w_E=0.3,\quad w_{\rm contact}=1.
+J=C(x_N)+0.1E.
 \]
 
-These weights are for outer ranking. The inner objective remains the original
+This weight is for outer ranking. The inner objective remains the original
 HardFlow surrogate with coefficient one. `C` is evaluated on normalized
 planning coordinates, whereas reported trajectory length is
 `sum_k ||p_{k+1}-p_k||_2` in physical coordinates. Simulator contacts are evaluated
-after generation and are not differentiable NLP constraints.
+after generation for reporting only; they do not contribute to the default
+objective and are not differentiable NLP constraints.
 
 ## Outer iteration
 
@@ -72,7 +72,7 @@ after generation and are not differentiable NLP constraints.
 4. Compute and freeze that candidate's uncontrolled prefix. Reject an entry
    outside the known entry ball. Solve the tail surrogate sequentially. Prefixes
    are reused within a candidate, not across different initial noises.
-5. Evaluate complete candidates, including a PD rollout for contact cost. Only
+5. Evaluate complete candidates, including a PD rollout for contact statistics. Only
    explicit-feasible strict improvements update the archive, fitted balls, best
    noise and optional effort cap. Incomplete candidates are logged as failures.
 6. After ten consecutive unsuccessful attempts, grow the global initial-noise
@@ -95,4 +95,3 @@ This is **adaptive MH-style optimization**, not a guarantee of sampling a fixed
 stationary distribution: archive-dependent balls, warm starts and optional
 control bounds change, and chain costs are cached from their previous
 evaluation. This limitation is inherited from the existing experiment.
-

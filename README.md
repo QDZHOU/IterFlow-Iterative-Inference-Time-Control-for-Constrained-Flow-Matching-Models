@@ -88,31 +88,3 @@ models. Results are numerical `.npz` / `.json` records; no figures are generated
 
 Default scene: start `(0.94875744, 2.93648809)`, goal `(7,9)`, fixed initial
 velocity `(-0.01347715, 0.06358764)`. Edit `configs/maze2d.json` to change it.
-
-## Algorithm
-
-HardFlow's Problem 6 / Algorithm 1 prediction variable, objective, constraints
-and affine successor mapping are preserved. IterFlow adds a history-ball
-constraint to **the actual successor `F(y)`**, then assigns `x_next = F(y*)`.
-It does not project the result after optimization.
-
-Defaults: 10 denoising steps, control on the last 5; first 150 outer attempts
-use the incumbent/global mixture, from attempt 151 use chain-centered adaptive
-MH-style search. Only explicit-feasible strict cost improvements update history.
-
-The outer cost is `C + 0.3 E + wall_contact_steps`, with
-`E = 0.5 * sum_i ||u_i||² Δt_i`. `C` is the original 800-scaled sum of squared
-adjacent normalized position differences. The outer effort weight does not
-change HardFlow's inner surrogate regularizer. Contact cost is evaluated by
-native PD rollout; optimization admission does not certify collision-free
-execution. See [equations and details](docs/method.md).
-
-## Verification and attribution
-
-Before the final source-only cleanup, local tests checked the affine successor
-ball, conditioning, guidance effort/caps, minimum-ball fitting, proposal ratios,
-screening and rollout contact counting. Test scripts are not included in this
-core snapshot.
-See [local validation](docs/validation.md) and [attribution](NOTICE.md).
-The native MuJoCo 3 adapter preserves the D4RL license; its physics can differ
-from the original MuJoCo 2 benchmark.

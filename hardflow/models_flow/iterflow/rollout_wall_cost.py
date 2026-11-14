@@ -49,7 +49,7 @@ def evaluate_wall_contacts(plan, start, goal, seed=0, max_steps=800, env_factory
 
 def apply_rollout_cost(result,backend,run,output=None):
     weight=float(backend.settings.get('rollout_wall_cost_weight',0.))
-    if weight==0:return result
+    if weight==0 and not backend.settings.get('evaluate_rollout',False):return result
     from .compare import physical_observations
     data,report=evaluate_wall_contacts(physical_observations(backend,run['X'][-1]),
         backend.settings['observation'],backend.settings['goal'],
